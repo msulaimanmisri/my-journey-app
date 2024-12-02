@@ -1,4 +1,3 @@
-// components/common/Button.tsx
 import { ButtonHTMLAttributes } from 'react';
 import Link from 'next/link';
 
