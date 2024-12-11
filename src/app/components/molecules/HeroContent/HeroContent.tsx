@@ -9,7 +9,7 @@ export function HeroContent() {
       </Heading>
       
       <div className="flex gap-4 justify-center my-6">
-        <Button href="/docs" variant="primary">Get Started</Button>
+        <Button href="/create-journey" variant="primary">Get Started</Button>
       </div>
     </div>
   );
