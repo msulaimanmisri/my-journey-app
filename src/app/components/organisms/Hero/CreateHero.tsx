@@ -1,4 +1,4 @@
-import { CreateHeader } from '@/app/components/molecules/JourneyContent/JourneyCreateHeader';
+import { CreateHeader } from '@/app/components/molecules/JourneyContent/JourneyTitle';
 
 export function CreateHero() {
   return (
