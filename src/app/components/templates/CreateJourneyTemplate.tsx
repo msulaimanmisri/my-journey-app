@@ -1,10 +1,38 @@
 "use client"
 
-import { JourneyInput } from '@/app/components/organisms/Journey/JourneyInput';
-import { useState } from "react";
+import { useState, useRef, useEffect } from 'react';
+import { JourneyTitle } from '@/app/components/molecules/JourneyContent/JourneyTitle';
+import { JourneyEvents } from '@/app/components/molecules/JourneyContent/JourneyEvents';
+import { JourneyPoster } from '@/app/components/molecules/JourneyContent/JourneyPoster';
+import html2canvas from 'html2canvas';
 
 export function CreateJourneyTemplate() {
+  const [title, setTitle] = useState<string>('');
   const [events, setEvents] = useState<string[]>(['']);
+  const posterRef = useRef<HTMLDivElement>(null);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedTitle = localStorage.getItem('journeyTitle');
+    const savedEvents = localStorage.getItem('journeyEvents');
+
+    if (savedTitle) setTitle(savedTitle);
+    if (savedEvents) setEvents(JSON.parse(savedEvents));
+  }, []);
+
+  // Save title changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('journeyTitle', title);
+  }, [title]);
+
+  // Save events changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('journeyEvents', JSON.stringify(events));
+  }, [events]);
 
   const addEvent = () => {
     if (events.length < 12) {
@@ -16,64 +44,51 @@ export function CreateJourneyTemplate() {
     setEvents(events.filter((_, index) => index !== indexToRemove));
   };
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  const handleEventChange = (index: number, value: string) => {
+    const newEvents = [...events];
+    newEvents[index] = value;
+    setEvents(newEvents);
+  };
+
+  const downloadPoster = async () => {
+    if (posterRef.current) {
+      const canvas = await html2canvas(posterRef.current);
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `${title || 'my-journey'}-${new Date().getFullYear()}.png`;
+      link.click();
+    }
+  };
 
   return (
-    <div className='flex h-[1500px]'>
+    <div className='flex h-[130vh]'>
       <div className="bg-slate-100 w-full">
         <div className="p-8 space-y-16">
-
-          <div id="title" className=''>
-            <h3 className='text-3xl text-slate-900 font-light'>
-              Your Journey Title
-            </h3>
-
-            <input type="text" className='mt-4 border-b-4 border-b-slate-500 bg-slate-100 text-slate-700 text-xl w-full py-3 px-4' />
-          </div>
-
-          <div id="event">
-            <h3 className='text-3xl text-slate-900 font-light'>
-              Event
-            </h3>
-
-            <p className='font-thin text-slate-500 my-3'>
-             Share your journey events throughout the year.
-            </p>
-
-            {events.map((event, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder={months[index]}
-                  className='mt-4 border-b-2 border-b-slate-500 bg-slate-100 text-slate-700 text-xl w-full py-3 px-4'
-                />
-                <button 
-                  onClick={() => removeEvent(index)}
-                  className='mt-4 text-red-500 hover:text-red-700 px-2 py-1 rounded'
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-
-            {events.length < 12 && (
-              <button 
-                onClick={addEvent} 
-                className='mt-4 bg-teal-500 text-white py-2 px-4 rounded'
-              >
-                Add More Event
-              </button>
-            )}
-          </div>
-
+          <JourneyTitle title={title} setTitle={setTitle} />
+          <JourneyEvents
+            events={events}
+            months={months}
+            handleEventChange={handleEventChange}
+            removeEvent={removeEvent}
+            addEvent={addEvent}
+          />
         </div>
       </div>
 
-      <div className="bg-teal-500 w-full">
-        Journey Preview
+      <div className="bg-teal-500 w-full p-36 relative">
+        <button
+          onClick={downloadPoster}
+          className="absolute top-4 right-4 bg-white text-teal-500 px-4 py-2 rounded-lg shadow-lg hover:bg-teal-50 transition-colors"
+        >
+          Download Poster
+        </button>
+        <JourneyPoster
+          title={title}
+          events={events}
+          months={months}
+          posterRef={posterRef}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { JourneyCreateHeader } from '../../molecules/JourneyContent/JourneyCreateHeader';
+import { JourneyCreateHeader } from '../../molecules/JourneyContent/JourneyTitle';
 
 export function JourneyInput() {
     return (
